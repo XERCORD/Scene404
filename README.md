@@ -49,6 +49,21 @@ npm run dev
 Le serveur API attend la connexion à PostgreSQL avant d'écouter sur le port
 5000. `GET /api/health` fournit une vérification simple de disponibilité.
 
+## Modifier les textes et images du site (Directus)
+
+Les contenus du site (infos de l'événement, artistes, équipe, tarifs, FAQ) se
+modifient dans Directus, sans toucher au code.
+
+```powershell
+# Depuis la racine du dépôt
+docker compose -f infra\docker-compose.yml up -d directus
+node infra\directus\setup.mjs
+```
+
+Le script crée les collections, ouvre leur lecture publique et y met le contenu
+d'exemple. L'interface d'administration est sur <http://localhost:8055/admin>
+(identifiants de développement dans `infra/docker-compose.yml`). Sans Directus,
+le site affiche le contenu d'exemple de `apps/client/src/data/`.
 ## Intégration continue
 
 Le workflow `.github/workflows/ci.yml` s'exécute lors des pushs et des pull

@@ -1,4 +1,213 @@
 @import "tailwindcss";
 
-/* TODO: Charte Scene404 — couleurs et polices dans @theme
-   ex: @theme { --color-primary: #...; --font-display: "..."; } */
+@theme {
+  --color-bg: #08070c;
+  --color-surface: #13111b;
+  --color-surface-2: #1d1a29;
+  --color-text: #f5f2ff;
+  --color-text-muted: #a8a3ba;
+  --color-danger: #ff5c6c;
+
+  /* Une couleur néon par rubrique, reprise de l'arborescence du site */
+  --color-primary: #a066ff;
+  --color-artists: #ff4fc3;
+  --color-team: #ffa53d;
+  --color-tickets: #3ddc84;
+  --color-contact: #4da8ff;
+
+  --font-display: "Unbounded Variable", system-ui, sans-serif;
+  --font-sans: "Space Grotesk Variable", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
+  --animate-equalizer: equalizer 1.2s ease-in-out infinite alternate;
+  --animate-float: float 16s ease-in-out infinite alternate;
+  --animate-blink: blink 1.4s steps(1) infinite;
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes equalizer {
+    from {
+      transform: scaleY(0.2);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes float {
+    from {
+      transform: translate(0, 0) scale(1);
+    }
+    to {
+      transform: translate(6%, -8%) scale(1.15);
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0.2;
+    }
+  }
+}
+
+/* La couleur d'accent suit la rubrique affichée (attribut data-accent) */
+@theme inline {
+  --color-accent: var(--accent);
+}
+
+:root {
+  --accent: var(--color-primary);
+}
+
+[data-accent="primary"] {
+  --accent: var(--color-primary);
+}
+[data-accent="artists"] {
+  --accent: var(--color-artists);
+}
+[data-accent="team"] {
+  --accent: var(--color-team);
+}
+[data-accent="tickets"] {
+  --accent: var(--color-tickets);
+}
+[data-accent="contact"] {
+  --accent: var(--color-contact);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grain photographique par-dessus tout le site */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--color-bg);
+}
+
+@layer components {
+  /* Texte en contour : le remplissage (couleur du fond) est peint par-dessus le trait pour masquer
+     les chevauchements internes des lettres de la police variable */
+  .text-outline {
+    color: var(--color-bg);
+    -webkit-text-stroke: 3px color-mix(in oklab, var(--color-text) 35%, var(--color-bg));
+    paint-order: stroke fill;
+  }
+
+  /* Halo qui suit le pointeur (les variables --x / --y sont posées par le composant Card) */
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(
+      420px circle at var(--x, 50%) var(--y, 0%),
+      color-mix(in oklab, var(--accent) 20%, transparent),
+      transparent 60%
+    );
+  }
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Effet « glitch » : deux copies décalées du texte apparaissent par à-coups */
+  .glitch {
+    position: relative;
+    display: inline-block;
+  }
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    content: attr(data-text) / "";
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 0 100% 0);
+  }
+  .glitch::before {
+    color: var(--color-contact);
+    animation: glitch-a 4s steps(1) infinite;
+  }
+  .glitch::after {
+    color: var(--color-artists);
+    animation: glitch-b 4s steps(1) infinite;
+  }
+}
+
+@keyframes glitch-a {
+  0%,
+  84%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+    transform: none;
+  }
+  86% {
+    clip-path: inset(10% 0 62% 0);
+    transform: translate(-0.05em, 0.01em);
+  }
+  89% {
+    clip-path: inset(58% 0 18% 0);
+    transform: translate(0.05em, -0.02em);
+  }
+  92% {
+    clip-path: inset(32% 0 44% 0);
+    transform: translate(-0.03em, 0);
+  }
+}
+
+@keyframes glitch-b {
+  0%,
+  85%,
+  100% {
+    clip-path: inset(0 0 100% 0);
+    transform: none;
+  }
+  87% {
+    clip-path: inset(66% 0 8% 0);
+    transform: translate(0.05em, 0.02em);
+  }
+  90% {
+    clip-path: inset(18% 0 55% 0);
+    transform: translate(-0.04em, -0.01em);
+  }
+  93% {
+    clip-path: inset(44% 0 30% 0);
+    transform: translate(0.03em, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+  }
+}

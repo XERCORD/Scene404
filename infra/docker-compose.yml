@@ -15,5 +15,45 @@ services:
       timeout: 5s
       retries: 5
 
+  # Crée la base "directus" à côté de celle de l'API, pour que Directus et Prisma ne partagent pas leurs tables
+  directus-db-init:
+    image: postgres:17-alpine
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: scene404
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        psql -h db -U scene404 -d scene404 -tAc "SELECT 1 FROM pg_database WHERE datname = 'directus'" | grep -q 1
+        || psql -h db -U scene404 -d scene404 -c "CREATE DATABASE directus"
+    restart: "no"
+
+  # CMS : textes et images du site. Identifiants ci-dessous réservés au développement local.
+  directus:
+    image: directus/directus:11.17.4
+    depends_on:
+      directus-db-init:
+        condition: service_completed_successfully
+    ports:
+      - "8055:8055"
+    environment:
+      SECRET: ${DIRECTUS_SECRET:-scene404-dev-secret-a-remplacer}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD:-scene404-dev}
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL:-http://localhost:8055}
+      DB_CLIENT: pg
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: directus
+      DB_USER: scene404
+      DB_PASSWORD: scene404
+      CORS_ENABLED: "true"
+      CORS_ORIGIN: ${CLIENT_URL:-http://localhost:5173}
+    volumes:
+      - directus_uploads:/directus/uploads
+
 volumes:
   postgres_data:
+  directus_uploads:

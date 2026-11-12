@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import cors from "cors";
 import express from "express";
 
@@ -13,4 +11,3 @@ app.get("/api/health", (_request, response) => {
 });
 
 export default app;
->>>>>>> 68998b64db95072f638f91b546c05d2e41f054fe
