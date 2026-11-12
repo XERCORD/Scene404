@@ -1,5 +1,19 @@
-# TODO (équipe infra) : services à définir
-#   - client  (React build servi par Nginx)
-#   - server  (API Express, port 5000)
-#   - db      (MongoDB ou PostgreSQL — à décider)
-#   - nginx   (reverse proxy : / -> client, /api -> server)
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: scene404
+      POSTGRES_PASSWORD: scene404
+      POSTGRES_DB: scene404
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scene404 -d scene404"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

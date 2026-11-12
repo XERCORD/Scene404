@@ -1,1 +1,13 @@
-// TODO: Config Express (cors, json, routes, middleware d'erreur)
+import cors from "cors";
+import express from "express";
+
+const app = express();
+
+app.use(cors({ origin: process.env.CLIENT_URL ?? "http://localhost:5173" }));
+app.use(express.json());
+
+app.get("/api/health", (_request, response) => {
+  response.json({ status: "ok" });
+});
+
+export default app;
