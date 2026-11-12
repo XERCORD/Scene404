@@ -1,0 +1,5 @@
+# TODO (équipe infra) : services à définir
+#   - client  (React build servi par Nginx)
+#   - server  (API Express, port 5000)
+#   - db      (MongoDB ou PostgreSQL — à décider)
+#   - nginx   (reverse proxy : / -> client, /api -> server)
