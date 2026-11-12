@@ -1,0 +1,58 @@
+name: Intégration continue
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    name: API et PostgreSQL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: scene404
+          POSTGRES_PASSWORD: scene404
+          POSTGRES_DB: scene404
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U scene404 -d scene404"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: apps/server
+    env:
+      DATABASE_URL: postgresql://scene404:scene404@localhost:5432/scene404?schema=public
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Configurer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: apps/server/package-lock.json
+
+      - name: Installer les dépendances du serveur
+        run: npm ci
+
+      - name: Générer le client Prisma
+        run: npm run db:generate
+
+      - name: Valider le schéma Prisma
+        run: npx prisma validate
+
+      - name: Appliquer les migrations
+        run: npx prisma migrate deploy
+
+      - name: Exécuter les tests du serveur
+        run: npm test

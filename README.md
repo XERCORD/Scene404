@@ -49,6 +49,14 @@ npm run dev
 Le serveur API attend la connexion à PostgreSQL avant d'écouter sur le port
 5000. `GET /api/health` fournit une vérification simple de disponibilité.
 
+## Intégration continue
+
+Le workflow `.github/workflows/ci.yml` s'exécute lors des pushs et des pull
+requests. Il installe les dépendances du serveur, génère et valide le client
+Prisma, applique les migrations à une base PostgreSQL temporaire, puis lance
+les tests du serveur avec `npm test`. Voir le [guide CI](docs/CI.md) pour le
+détail de chaque étape et l'interprétation des résultats.
+
 ## Règles Git
 
 - Pas de push direct sur `main`.

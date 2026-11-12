@@ -68,7 +68,9 @@ Le fichier `.env` contient déjà l'URL correspondant au service PostgreSQL
 Compose local. Remplacez `JWT_SECRET` par une valeur aléatoire avant d'ajouter
 des fonctionnalités d'authentification. Les identifiants PostgreSQL présents
 dans Compose sont réservés au développement et ne doivent pas être réutilisés
-en production.
+en production. Le conteneur est accessible sur `localhost:5433` pour éviter
+le PostgreSQL local qui utilise déjà le port `5432`; il n'est pas exposé au
+réseau local.
 
 Le serveur attend une connexion réussie à PostgreSQL avant d'écouter sur le
 port `5000`. Si la variable `DATABASE_URL` manque ou si PostgreSQL n'est pas
