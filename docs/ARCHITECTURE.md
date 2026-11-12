@@ -112,28 +112,25 @@ client/src/
 ## Back — `apps/server`
 
 ```
-server/src/
-├── routes/          # Définition des URLs → appellent les controllers
-│   ├── auth.routes.js
-│   ├── event.routes.js
-│   ├── artist.routes.js
-│   ├── ticket.routes.js
-│   └── admin.routes.js
-├── controllers/     # Logique de chaque route
-├── models/          # User, Event, Artist, Ticket
-├── middlewares/
-│   ├── auth.middleware.js    # Vérifie le JWT → req.user
-│   ├── admin.middleware.js   # Vérifie role === "admin"
-│   └── error.middleware.js
-├── config/
-│   └── db.js                 # Connexion BDD
-├── scripts/
-│   └── seed.js               # Données de test + premier admin
-├── app.js                    # Config Express
-└── server.js                 # Lancement
+server/
+├── prisma/
+│   ├── migrations/            # Migrations PostgreSQL versionnées
+│   └── schema.prisma          # Modèles et relations Prisma
+├── prisma.config.ts           # Configuration du CLI Prisma
+└── src/
+    ├── routes/                # Correspondance entre URL et contrôleurs
+    ├── controllers/           # Logique de chaque route
+    ├── middlewares/           # Authentification, rôles et erreurs
+    ├── config/
+    │   └── db.js              # Client Prisma et connexion PostgreSQL
+    ├── generated/prisma/      # Client généré, ignoré par Git
+    ├── scripts/
+    │   └── seed.js            # Données de test + premier admin
+    ├── app.js                 # Configuration Express
+    └── server.js              # Démarrage et arrêt propre
 ```
 
-**Flux d'une requête** : `routes` → `middlewares` (si protégée) → `controllers` → `models` → réponse JSON.
+**Flux d'une requête** : `routes` → `middlewares` (si protégée) → `controllers` → Prisma Client → réponse JSON.
 
 **Routes API**
 
@@ -149,14 +146,18 @@ server/src/
 | POST/PUT/DELETE | `/api/admin/artists` · `/api/admin/artists/:id` | Admin |
 | GET | `/api/admin/tickets` | Admin |
 
-**Modèles**
+**Modèles Prisma**
 
 | Modèle | Champs principaux |
 |---|---|
 | User | name, email, password (hashé), role (`user` / `admin`) |
-| Event | titre, description, date, lieu, prix, places dispo, artistes |
-| Artist | nom, description, image |
-| Ticket | user, event, date d'achat, code |
+| Event | title, description, date, venue, ticketPrice, availableSeats, artists |
+| Artist | name, description, image |
+| Ticket | user, event, purchasedAt, code |
+
+Les contrôleurs et services importent le client partagé exporté par
+`src/config/db.js`. Faites évoluer le schéma avec des migrations Prisma plutôt
+qu'en modifiant directement la base de données.
 
 ---
 
@@ -188,12 +189,24 @@ Ports par défaut en dev : client `5173`, server `5000`.
 Chaque app a un `.env.example`. Copier en `.env` et remplir. **Ne jamais commit de `.env`.**
 
 - `apps/client/.env` : `VITE_API_URL`
-- `apps/server/.env` : `PORT`, `DB_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`
+- `apps/server/.env` : `PORT`, `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CLIENT_URL`
+
+## Base de données
+
+- PostgreSQL est la base de données du projet. Démarrez-la en local avec
+  `docker compose -f infra/docker-compose.yml up -d db`.
+- Définissez `DATABASE_URL` dans `apps/server/.env` (voir `.env.example`).
+- Depuis `apps/server`, exécutez `npm run db:generate` pour générer le client.
+- Appliquez les migrations locales avec
+  `npm run db:migrate -- --name init`.
+- Utilisez `npm run db:studio` pour inspecter les données locales.
+
+Les identifiants Compose locaux sont réservés au développement et ne doivent
+pas être réutilisés en production.
 
 ---
 
 ## À décider en équipe
 
-- [ ] Base de données : MongoDB ou PostgreSQL
 - [ ] Répartition des fichiers / fonctionnalités entre les devs
 - [ ] Branche de travail commune (`dev`) ou PR directes vers `main`

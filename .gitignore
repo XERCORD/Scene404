@@ -1,5 +1,6 @@
 # Dépendances
 node_modules/
+apps/server/src/generated/prisma/
 
 # Variables d'environnement (ne jamais commit les vrais .env)
 .env

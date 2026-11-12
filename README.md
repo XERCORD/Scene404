@@ -6,7 +6,7 @@ Site de billetterie de concerts (projet YDAYS — Ynov B3).
 
 - **Front** : React (Vite) + Tailwind CSS — `apps/client`
 - **Back** : Node.js + Express — `apps/server`
-- **Base de données** : à définir (MongoDB ou PostgreSQL)
+- **Base de données** : PostgreSQL + Prisma ORM — `apps/server/prisma`
 - **Infra** : Docker + Nginx — `infra/`
 
 ## Structure
@@ -22,23 +22,32 @@ Scene404/
 
 Détail complet : [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
+Configuration Prisma et PostgreSQL : [docs/PRISMA_POSTGRES.md](docs/PRISMA_POSTGRES.md)
+
 ## Lancer le projet en local
 
-> À compléter une fois les projets initialisés.
-
-```bash
-# Back
-cd apps/server
-cp .env.example .env   # puis remplir les valeurs
+```powershell
+# Depuis la racine du dépôt
+Copy-Item apps\server\.env.example apps\server\.env
+docker compose -f infra\docker-compose.yml up -d db
+Set-Location apps\server
 npm install
+npm run db:generate
+npm run db:migrate -- --name init
 npm run dev
+```
 
-# Front
-cd apps/client
-cp .env.example .env
+Dans un autre terminal PowerShell, depuis la racine du dépôt, lancez le front :
+
+```powershell
+Copy-Item apps\client\.env.example apps\client\.env
+Set-Location apps\client
 npm install
 npm run dev
 ```
+
+Le serveur API attend la connexion à PostgreSQL avant d'écouter sur le port
+5000. `GET /api/health` fournit une vérification simple de disponibilité.
 
 ## Règles Git
 

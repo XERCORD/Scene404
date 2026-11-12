@@ -1,0 +1,59 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  user
+  admin
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(user)
+  tickets   Ticket[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Artist {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  image       String?
+  events      Event[]
+}
+
+model Event {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  date           DateTime
+  venue          String
+  ticketPrice    Decimal  @db.Decimal(10, 2)
+  availableSeats Int
+  artists        Artist[]
+  tickets        Ticket[]
+}
+
+model Ticket {
+  id          String   @id @default(cuid())
+  userId      String
+  eventId     String
+  purchasedAt DateTime @default(now())
+  code        String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Restrict)
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([eventId])
+}
