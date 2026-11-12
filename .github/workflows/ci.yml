@@ -1,6 +1,6 @@
-name: Intégration continue
+name: Continuous Integration
 
-on:
+'on':
   push:
   pull_request:
   workflow_dispatch:
