@@ -64,6 +64,13 @@ Le script crée les collections, ouvre leur lecture publique et y met le contenu
 d'exemple. L'interface d'administration est sur <http://localhost:8055/admin>
 (identifiants de développement dans `infra/docker-compose.yml`). Sans Directus,
 le site affiche le contenu d'exemple de `apps/client/src/data/`.
+## Intégration continue
+
+Le workflow `.github/workflows/ci.yml` s'exécute lors des pushs et des pull
+requests. Il installe les dépendances du serveur, génère et valide le client
+Prisma, applique les migrations à une base PostgreSQL temporaire, puis lance
+les tests du serveur avec `npm test`. Voir le [guide CI](docs/CI.md) pour le
+détail de chaque étape et l'interprétation des résultats.
 
 ## Règles Git
 
